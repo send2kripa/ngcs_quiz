@@ -1,0 +1,23 @@
+---
+- name: parse file content and display it
+  hosts: "*"
+  tasks:
+    - include_vars: myvars.yaml
+    - name: 'Get today date'
+      command: date '+ %B %d'
+      register: str_date
+
+    - name: 'Read a file and parse the content'
+      shell: grep -i -e 'Error' -e 'Fail' {{ log_file }}
+      register: presence
+      delegate_to: 127.0.0.1
+    
+    - name: 'test date'
+      debug:
+        msg: "{{ str_date.stdout }}"
+
+    - name: "Display"
+      debug: 
+        var: presence.stdout
+      when: presence.stdout.find(str_date.stdout)
+      
