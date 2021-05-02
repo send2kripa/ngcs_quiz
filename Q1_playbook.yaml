@@ -56,5 +56,5 @@
     - name: "Cleanup archive files from remote host"
       file:
         path: "{{ remote_src }}/output.zip"
-        stat: absent
+        state: absent
       when: archive_state.stat.exists
