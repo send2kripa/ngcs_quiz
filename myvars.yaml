@@ -1,0 +1,2 @@
+remote_src: '/tmp/files_dir'
+local_dest: './files_dir'

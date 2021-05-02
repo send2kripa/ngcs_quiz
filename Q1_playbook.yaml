@@ -1,0 +1,51 @@
+---
+- name: 'Find and archive the files'
+  hosts: work1.local
+  tasks:
+    - include_vars: myvars.yaml
+    - name: "Find files from remote host"
+      find:
+        paths: "{{ remote_src }}"
+        file_type: file
+        age: -30d
+        excludes:
+          - "*.log"
+          - "*.out"
+        hidden: yes
+        recurse: yes
+      register: files_matched
+
+    - name: "Print the find result"
+      debug:
+        var: files_matched.files | map(attribute='path') | list
+
+    - name: "Delete existing archive if exist"
+      file:
+        path: "{{ remote_src }}/output.zip"
+        state: absent
+    
+    - name: "Cleanup existing or old archive if exists locally"
+      file:
+        path: "{{ local_dest }}/output.zip"
+        state: absent
+      delegate_to: 127.0.0.1
+
+    - name: "Archive the find result"
+      archive:
+        path: "{{ files_to_archive }}"
+        dest: "{{ remote_src }}/output.zip"
+        format: zip
+      vars:
+        files_to_archive: "{{ files_matched.files | map(attribute='path') | list }}"
+
+    - name: "Check the output zip file exist"
+      stat:
+        path: "{{ remote_src }}/output.zip"
+      register: archive_state
+
+    - name: "Download the archive files from remote host to localhost"
+      ansible.builtin.fetch:
+        src: "{{ remote_src }}/output.zip"
+        dest: "{{ local_dest }}/"
+        flat: yes
+      when: archive_state.stat.exists
