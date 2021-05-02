@@ -19,6 +19,7 @@
       debug:
         var: files_matched.files | map(attribute='path') | list
 
+# Clean the target directory if the archive file created previously
     - name: "Delete existing archive if exist"
       file:
         path: "{{ remote_src }}/output.zip"
@@ -30,6 +31,7 @@
         state: absent
       delegate_to: 127.0.0.1
 
+# Archive the find result
     - name: "Archive the find result"
       archive:
         path: "{{ files_to_archive }}"
@@ -48,4 +50,11 @@
         src: "{{ remote_src }}/output.zip"
         dest: "{{ local_dest }}/"
         flat: yes
+      when: archive_state.stat.exists
+
+# Clean up the files finally
+    - name: "Cleanup archive files from remote host"
+      file:
+        path: "{{ remote_src }}/output.zip"
+        stat: absent
       when: archive_state.stat.exists
