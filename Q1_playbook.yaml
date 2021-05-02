@@ -1,6 +1,6 @@
 ---
 - name: 'Find and archive the files'
-  hosts: work1.local
+  hosts: "*"
   tasks:
     - include_vars: myvars.yaml
     - name: "Find files from remote host"

@@ -1,0 +1,69 @@
+---
+- name: Check service status and restart if not running?
+  hosts: "*"
+  gather_facts: yes
+  become: true
+  tasks:
+    - name: "Gather service facts"
+      service_facts:
+
+    - name: "See App server service fact"
+      debug: 
+        msg: "{{ ansible_facts.services['tomcat.service'].state }}"
+
+    - name: "See Database service fact"
+      debug:
+        msg: "{{ ansible_facts.services['mongod.service'].state }}"
+
+    - name: "See Web server fact"
+      debug:
+        msg:  "{{ ansible_facts.services['nginx.service'].state }}"
+
+# Restart DB service
+    - name: "Restart < Database > if it is not running!"
+      command: echo "trigger service restart"
+      notify: db_svc
+      when: ansible_facts.services['mongod.service'].state != 'running'
+
+# Restart App service
+    - name: "Restart <App Service> if it is not running!"
+      command: echo "trigger service restart"
+      notify: tom_svc
+      when: ansible_facts.services['tomcat.service'].state != 'running'
+
+# Restart Web service
+    - name: "Restart <Web Service> if it is not running!"
+      command: echo 'trigger service restart'
+      notify: web_svc
+      when: ansible_facts.services['nginx.service'].state != 'running'
+
+  handlers:
+    - name: db_svc
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: yes
+      with_items:
+        - mongod
+        - tomcat
+        - nginx
+      become: true
+
+    - name: tom_svc
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: yes
+      with_items:
+        - tomcat
+        - nginx
+      become: true
+
+    - name: web_svc
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: yes
+      with_items:
+        - nginx
+      become: true
