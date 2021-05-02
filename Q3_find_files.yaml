@@ -1,0 +1,8 @@
+---
+- name: "Find files and directories"
+  hosts: "*"
+  tasks:
+    - include_vars: myvars.yaml
+    - name: "Find files and directories"
+      shell: find "{{ local_src }}" -user test -mtime +30 -print | zip "{{ local_archive_dir }}"/test.zip -@
+      delegate_to: 127.0.0.1

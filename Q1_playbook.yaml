@@ -7,6 +7,7 @@
       find:
         paths: "{{ remote_src }}"
         file_type: file
+        age_stamp: ctime
         age: -30d
         excludes:
           - "*.log"

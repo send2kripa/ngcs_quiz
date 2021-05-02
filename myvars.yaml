@@ -1,2 +1,4 @@
 remote_src: '/tmp/files_dir'
 local_dest: './files_dir'
+local_src: '/tmp/test_user_files'
+local_archive_dir: './test_user_files'
